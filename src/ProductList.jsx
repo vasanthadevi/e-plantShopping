@@ -1,9 +1,15 @@
 import React, { useState,useEffect } from 'react';
 import './ProductList.css'
 import CartItem from './CartItem';
+import {useSelector, useDispatch } from 'react-redux';
+
 function ProductList() {
     const [showCart, setShowCart] = useState(false); 
     const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
+    const [addedToCart, setAddedToCart] = useState(null);
+    const dispatch = useDispatch();
+    
+
 
     const plantsArray = [
         {
@@ -232,6 +238,14 @@ function ProductList() {
     fontSize: '30px',
     textDecoration: 'none',
    }
+   //Style for Category
+   const categoryTitleStyle = {
+    textAlign: 'center',
+    fontSize: '24px',
+    fontWeight: 'bold',
+    margin: '20px 0', // Add some margin to space out the title
+    textDecoration: 'underline',
+  };
    const handleCartClick = (e) => {
     e.preventDefault();
     setShowCart(true); // Set showCart to true when cart icon is clicked
@@ -246,6 +260,25 @@ const handlePlantsClick = (e) => {
     e.preventDefault();
     setShowCart(false);
   };
+   const handleAddToCart = (plant) => {
+       dispatch(addItem({
+        name: plant.name,
+        image: plant.image,
+        cost: plant.cost,
+       }));
+       setAddedToCart(plant.name);
+    };
+    useEffect(() => {
+        if (addedToCart) {
+          console.log(`${addedToCart} added to cart`);
+          // Reset addedToCzrt after 3 seconds
+          const timer = setTimeout(() => {
+            setAddedToCart(null);
+          }, 3000);
+    
+          return () => clearTimeout(timer); // Cleanup the timer on unmount
+        }
+      }, [addedToCart]);
     return (
         <div>
              <div className="navbar" style={styleObj}>
@@ -268,6 +301,25 @@ const handlePlantsClick = (e) => {
         </div>
         {!showCart? (
         <div className="product-grid">
+             {plantsArray.map((category, index) => (
+                <div key={index}>
+                    <h1><div style={categoryTitleStyle}>{category.category}</div></h1>
+                    <div className="product-list">
+                        {category.plants.map((plant, plantIndex) => (
+                        <div className="product-card" key={plantIndex}>
+                            <img className="product-image" src={plant.image} alt={plant.name} />
+                            <div className="product-title">{plant.name}</div>
+                            {/*Similarly like the above plant.name show other details like description and cost*/}
+                            <div className="product-title">{plant.description}</div>
+                            <div className="product-price">{plant.cost}</div>
+                            
+                            <button className="product-button" onClick={() => handleAddToCart(plant)}>Add to Cart</button>
+                            {addedToCart === plant.name && <div className="added-message">Added to Cart!</div>}
+                        </div>
+                        ))}
+                    </div>
+                </div>
+            ))}
 
 
         </div>
